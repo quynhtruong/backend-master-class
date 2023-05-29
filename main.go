@@ -5,7 +5,7 @@ import (
 	"log"
 
 	_ "github.com/lib/pq"
-	"github.com/techschool/simplebank/db/api"
+	"github.com/techschool/simplebank/api"
 	db "github.com/techschool/simplebank/db/sqlc"
 	"github.com/techschool/simplebank/util"
 )
