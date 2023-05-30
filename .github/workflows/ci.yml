@@ -47,7 +47,8 @@ jobs:
         migrate -version
 
     - name: Add dependencies
-      run: | which go
+      run: | 
+        which go
         go mod tidy
 
     - name: Run migrations
