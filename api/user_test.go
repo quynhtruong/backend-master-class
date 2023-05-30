@@ -3,9 +3,9 @@ package api
 import (
 	"testing"
 
+	db "github.com/quynhtruong/backend-master-class/db/sqlc"
+	"github.com/quynhtruong/backend-master-class/util"
 	"github.com/stretchr/testify/require"
-	db "github.com/techschool/simplebank/db/sqlc"
-	"github.com/techschool/simplebank/util"
 )
 
 func randomUser(t *testing.T) (user db.User, password string) {

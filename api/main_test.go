@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	db "github.com/quynhtruong/backend-master-class/db/sqlc"
+	"github.com/quynhtruong/backend-master-class/util"
 	"github.com/stretchr/testify/require"
-	db "github.com/techschool/simplebank/db/sqlc"
-	"github.com/techschool/simplebank/util"
 )
 
 func newTestServer(t *testing.T, store db.Store) *Server {

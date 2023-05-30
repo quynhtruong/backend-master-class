@@ -7,8 +7,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	db "github.com/techschool/simplebank/db/sqlc"
-	"github.com/techschool/simplebank/token"
+	db "github.com/quynhtruong/backend-master-class/db/sqlc"
+	"github.com/quynhtruong/backend-master-class/token"
 )
 
 type TransferRequest struct {

@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/quynhtruong/backend-master-class/util"
 	"github.com/stretchr/testify/require"
-	"github.com/techschool/simplebank/util"
 )
 
 func creatRandomUser(t *testing.T) User {
