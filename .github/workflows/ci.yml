@@ -46,11 +46,6 @@ jobs:
         which migrate
         migrate -version
 
-    - name: Add dependencies
-      run: | 
-        which go
-        go mod tidy
-
     - name: Run migrations
       run: make migrateup
 
