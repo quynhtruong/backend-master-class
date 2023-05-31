@@ -48,7 +48,7 @@ func (server *Server) LoginUser(ctx context.Context, req *pb.LoginUserRequest) (
 	})
 
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to create session")
+		return nil, status.Errorf(codes.Internal, "failed to create session %w", err)
 	}
 
 	response := &pb.LoginUserResponse{
