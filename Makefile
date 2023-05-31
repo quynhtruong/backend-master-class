@@ -33,7 +33,17 @@ test:
 
 server:
 	go run main.go
+
 mock:
 	~/go/bin/mockgen -package mockdb -destination db/mock/store.go github.com/quynhtruong/backend-master-class/db/sqlc Store
 
-.PHONY: postgres createdb dropdb migrateup migratedown sqlc server mock migratedown1 migrateup1 db_docs db_schema
+proto:
+	rm -f pb/*.go
+	protoc --proto_path=proto --go_out=pb --go_opt=paths=source_relative \
+    --go-grpc_out=pb --go-grpc_opt=paths=source_relative \
+    proto/*.proto
+
+evans:
+	evans -r repl --host localhost --port 9090
+
+.PHONY: postgres createdb dropdb migrateup migratedown sqlc server mock migratedown1 migrateup1 db_docs db_schema proto
