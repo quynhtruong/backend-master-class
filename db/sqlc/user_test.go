@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"database/sql"
 	"testing"
 
 	"github.com/quynhtruong/backend-master-class/util"
@@ -40,4 +41,38 @@ func TestGetUser(t *testing.T) {
 	require.Equal(t, user1.HashedPassword, user2.HashedPassword)
 	require.Equal(t, user1.FullName, user2.FullName)
 	require.Equal(t, user1.Email, user2.Email)
+}
+
+func TestUpdateUserOnlyFullName(t *testing.T) {
+	oldUser := creatRandomUser(t)
+	newFullName := util.RandomOwner()
+	updatedUser, err := testQueries.UpdateUser(context.Background(), UpdateUserParams{
+		Username: oldUser.Username,
+		FullName: sql.NullString{
+			String: newFullName,
+			Valid:  true,
+		},
+	})
+	require.NoError(t, err)
+	require.Equal(t, updatedUser.FullName, newFullName)
+	require.Equal(t, updatedUser.Username, oldUser.Username)
+	require.Equal(t, updatedUser.HashedPassword, oldUser.HashedPassword)
+	require.Equal(t, updatedUser.Email, oldUser.Email)
+}
+
+func TestUpdateUserOnlyEmail(t *testing.T) {
+	oldUser := creatRandomUser(t)
+	newEmail := util.RandomEmail()
+	updatedUser, err := testQueries.UpdateUser(context.Background(), UpdateUserParams{
+		Username: oldUser.Username,
+		Email: sql.NullString{
+			String: newEmail,
+			Valid:  true,
+		},
+	})
+	require.NoError(t, err)
+	require.Equal(t, updatedUser.Email, newEmail)
+	require.Equal(t, updatedUser.Username, oldUser.Username)
+	require.Equal(t, updatedUser.HashedPassword, oldUser.HashedPassword)
+	require.Equal(t, updatedUser.FullName, oldUser.FullName)
 }

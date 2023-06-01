@@ -25,6 +25,7 @@ db_docs:
 db_schema:
 	dbml2sql --postgres -o doc/schema.sql doc/db.dbml
 
+# remember to run make mock after this command
 sqlc:	
 	sqlc generate
 
