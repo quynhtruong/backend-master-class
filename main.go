@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"github.com/hibiken/asynq"
 	_ "github.com/lib/pq"
 	"github.com/quynhtruong/backend-master-class/api"
 	db "github.com/quynhtruong/backend-master-class/db/sqlc"
@@ -15,6 +16,7 @@ import (
 	"github.com/quynhtruong/backend-master-class/gapi"
 	"github.com/quynhtruong/backend-master-class/pb"
 	"github.com/quynhtruong/backend-master-class/util"
+	"github.com/quynhtruong/backend-master-class/worker"
 	"github.com/rakyll/statik/fs"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -32,8 +34,13 @@ func main() {
 	}
 
 	store := db.NewStore(conn)
-	go runGatewayServer(config, store)
-	runGrpcServer(config, store)
+	redisOpt := asynq.RedisClientOpt{
+		Addr: config.RedisAddress,
+	}
+	distributor := worker.NewRedisTaskDistributor(redisOpt)
+	go runTaskProcessor(redisOpt, store)
+	go runGatewayServer(config, store, distributor)
+	runGrpcServer(config, store, distributor)
 }
 
 func runGinServer(config util.Config, store db.Store) {
@@ -47,8 +54,16 @@ func runGinServer(config util.Config, store db.Store) {
 	}
 }
 
-func runGrpcServer(config util.Config, store db.Store) {
-	server, err := gapi.NewServer(config, store)
+func runTaskProcessor(redisOpt asynq.RedisClientOpt, store db.Store) {
+	processor := worker.NewRedisTaskProccessor(redisOpt, store)
+	err := processor.Start()
+	if err != nil {
+		log.Fatal("Failed to start processor")
+	}
+}
+
+func runGrpcServer(config util.Config, store db.Store, taskDistributor worker.TaskDistributor) {
+	server, err := gapi.NewServer(config, store, taskDistributor)
 	if err != nil {
 		log.Fatal("can not creat server", err)
 	}
@@ -68,8 +83,8 @@ func runGrpcServer(config util.Config, store db.Store) {
 	}
 }
 
-func runGatewayServer(config util.Config, store db.Store) {
-	server, err := gapi.NewServer(config, store)
+func runGatewayServer(config util.Config, store db.Store, taskDistributor worker.TaskDistributor) {
+	server, err := gapi.NewServer(config, store, taskDistributor)
 	if err != nil {
 		log.Fatal("can not creat server", err)
 	}

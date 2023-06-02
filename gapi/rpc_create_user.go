@@ -3,12 +3,15 @@ package gapi
 import (
 	"context"
 	"log"
+	"time"
 
+	"github.com/hibiken/asynq"
 	"github.com/lib/pq"
 	db "github.com/quynhtruong/backend-master-class/db/sqlc"
 	"github.com/quynhtruong/backend-master-class/pb"
 	"github.com/quynhtruong/backend-master-class/util"
 	"github.com/quynhtruong/backend-master-class/val"
+	"github.com/quynhtruong/backend-master-class/worker"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -40,6 +43,18 @@ func (server *Server) CreateUser(ctx context.Context, req *pb.CreateUserRequest)
 			log.Println(pgErr.Code.Name())
 		}
 		return nil, status.Errorf(codes.Internal, "failed to create user: %s", err)
+	}
+	taskPayload := &worker.PayloadSendVerifyEmail{
+		Username: user.Username,
+	}
+	opts := []asynq.Option{
+		asynq.MaxRetry(10),
+		asynq.ProcessIn(10 * time.Second),
+		asynq.Queue(worker.QueueCritical),
+	}
+	err = server.taskDistributor.DistributeTaskSendVerifyEmail(ctx, taskPayload, opts...)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Failed to distribute task to send verify user")
 	}
 	response := &pb.CreateUserResponse{
 		User: ConvertUser(user),
